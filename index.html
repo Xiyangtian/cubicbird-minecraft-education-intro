@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>我的世界教育版 · 体验课</title>
+<style>
+/* ============================================================
+   方块鸟 Cubicbird 配色（四色原则 + 附加色 + 品牌橙透明度）
+   改配色只改这一段
+   ============================================================ */
+:root{
+  --title:  #333333;                    /* 标题文字 */
+  --orange: #F3A21C;                    /* 橙色强调 */
+  --bg:     #FFFFFF;                    /* 背景 */
+  --muted:  #64748B;                    /* 次要文字 */
+  --card:   #F9FAFB;                    /* 卡片背景 */
+  --line:   #EDEDED;                    /* 分隔线 / 边框 */
+  --o60: rgba(243,162,28,.60);
+  --o38: rgba(243,162,28,.38);
+  --o20: rgba(243,162,28,.20);
+  --radius: 14px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--title);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",
+              "Hiragino Sans GB","Segoe UI",Roboto,sans-serif;
+  line-height:1.65; font-size:16px;
+}
+.wrap{max-width:900px; margin:0 auto; padding:0 20px}
+
+/* ---------- 头部 ---------- */
+header{padding:46px 0 26px; text-align:center; border-bottom:1px solid var(--line)}
+h1{margin:0 0 10px; font-size:30px; letter-spacing:.5px}
+.sub{margin:0; color:var(--muted); font-size:15px}
+.progress-note{margin:20px 0 0; color:var(--muted); font-size:14px}
+.progress-note b{color:var(--orange)}
+
+/* ---------- 选项卡（顶上那排，点了切换下面那张卡片）---------- */
+.tabs{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:22px 0 0}
+.tab{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 18px; border-radius:999px; cursor:pointer;
+  background:#fff; border:1px solid var(--line); color:var(--muted);
+  font-family:inherit; font-size:14px; font-weight:700; transition:.15s;
+}
+.tab:hover:not(:disabled){border-color:var(--o60); color:var(--title)}
+.tab .name{font-weight:400; font-size:13px; color:var(--muted)}
+.tab .ico{font-size:12px; opacity:.85}
+.tab[aria-selected="true"]{background:var(--orange); border-color:var(--orange); color:#fff}
+.tab[aria-selected="true"] .name,
+.tab[aria-selected="true"] .ico{color:#fff; opacity:.95}
+.tab:disabled{opacity:.55; cursor:not-allowed; background:#fff; color:#b9c0cb}
+.tab.done .ico{color:var(--orange)}
+.tab[aria-selected="true"].done .ico{color:#fff}
+
+/* ---------- 通用小节 ---------- */
+section{padding:34px 0}
+h2{font-size:20px; margin:0 0 18px; display:flex; align-items:center; gap:8px}
+h2::before{content:""; width:5px; height:20px; border-radius:3px; background:var(--orange)}
+
+/* ---------- 怎么用 ---------- */
+.howto ol{margin:0; padding:0; list-style:none; counter-reset:s}
+.howto li{
+  counter-increment:s; position:relative; padding:12px 16px 12px 52px;
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  margin-bottom:10px; font-size:15px
+}
+.howto li::before{
+  content:counter(s); position:absolute; left:16px; top:12px;
+  width:24px; height:24px; border-radius:50%; background:var(--orange); color:#fff;
+  font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center
+}
+.howto code{background:var(--o20); padding:1px 6px; border-radius:5px; font-size:14px}
+
+/* ---------- 当前那一节课的卡片 ---------- */
+.card{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:26px
+}
+.card-head{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px}
+.badge{
+  background:var(--o20); color:#9a6410; border:1px solid var(--o38);
+  font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px
+}
+.card h3{margin:0; font-size:22px}
+.meta{margin:0 0 4px; color:var(--muted); font-size:13.5px}
+.desc{margin:0 0 22px; font-size:15.5px}
+/* 卡片里按【时间顺序】分两个环节：先下载世界 → 做完任务再回来拿改造程序 */
+.steps{display:flex; flex-direction:column; gap:24px}
+.step{border-top:1px dashed var(--line); padding-top:20px}
+.step:first-child{border-top:0; padding-top:0}
+.step-head{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:13px}
+.step-no{
+  background:var(--orange); color:#fff; font-size:12px; font-weight:700;
+  padding:3px 11px; border-radius:999px; letter-spacing:.3px
+}
+.step-title{font-size:16.5px; font-weight:700}
+.step-when{font-size:12.5px; color:var(--muted)}
+.step .btn-primary{width:100%}
+.sub-block{
+  border-left:3px solid var(--o38); padding-left:16px; margin-top:16px;
+  display:flex; flex-direction:column; gap:8px
+}
+.sub-block .block-label{margin:0}
+.block{display:flex; flex-direction:column; gap:9px}
+.block-label{font-size:13px; font-weight:700; color:var(--muted); letter-spacing:.3px}
+.steps-mini{margin:0; padding-left:20px; font-size:13px; color:var(--muted); line-height:1.9}
+.steps-mini li::marker{color:var(--orange); font-weight:700}
+.block-label .size{font-weight:400; color:#9aa4b2}
+.hint{margin:0; font-size:12.5px; color:var(--muted)}
+.hint.url{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px;
+  word-break:break-all; color:#9aa4b2
+}
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  border-radius:10px; padding:12px 18px; font-size:15px; font-weight:700;
+  border:1px solid transparent; cursor:pointer; text-decoration:none;
+  font-family:inherit; transition:.15s
+}
+.btn-primary{background:var(--orange); color:#fff; font-size:16px; padding:15px 18px}
+.btn-primary:hover{background:#e0910f}
+.btn-copy{background:#fff; color:var(--title); border-color:var(--o60); flex:1}
+.btn-copy:hover{background:var(--o20)}
+.btn-ghost{background:#fff; color:var(--muted); border-color:var(--line)}
+.btn-ghost:hover{border-color:var(--o38); color:var(--title)}
+.row{display:flex; gap:8px; flex-wrap:wrap}
+.achv{list-style:none; margin:0; padding:0; font-size:14.5px}
+.achv li{padding:4px 0; color:#4b5563}
+.achv b{color:var(--orange); letter-spacing:-1px; margin-right:7px}
+.knobs{list-style:none; margin:0; padding:0; font-size:14px; color:#4b5563}
+.knobs li{padding:4px 0 4px 16px; position:relative}
+.knobs li::before{content:"·"; position:absolute; left:4px; color:var(--orange); font-weight:700}
+.knobs code{background:#fff; border:1px solid var(--line); padding:0 5px; border-radius:4px}
+
+/* ---------- 锁着 / 没开课 ---------- */
+.locked-box{
+  padding:46px 20px; text-align:center;
+  background:var(--card); border:1px dashed var(--line); border-radius:var(--radius);
+  color:var(--muted)
+}
+.locked-box .big{font-size:34px; display:block; margin-bottom:10px}
+.locked-box b{color:var(--title)}
+.locked-box .small{font-size:14px}
+
+/* ---------- FAQ ---------- */
+.faq details{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:14px 18px; margin-bottom:10px
+}
+.faq summary{cursor:pointer; font-weight:700; font-size:15px; outline:none}
+.faq summary:hover{color:var(--orange)}
+.faq p{margin:10px 0 0; font-size:14.5px; color:#4b5563}
+.faq code{background:var(--o20); padding:1px 6px; border-radius:5px}
+
+/* ---------- 老师区 ---------- */
+.teacher{
+  background:#fff; border:1px dashed var(--o60); border-radius:var(--radius);
+  padding:16px 20px
+}
+.teacher summary{cursor:pointer; font-weight:700; color:#9a6410; outline:none}
+.teacher h4{margin:18px 0 8px; font-size:14px; color:var(--muted)}
+.teacher ul{margin:0; padding-left:20px; font-size:14px; color:#4b5563}
+.teacher li{margin-bottom:5px}
+.teacher a{color:var(--orange); text-decoration:none}
+.teacher a:hover{text-decoration:underline}
+.teacher .files{display:flex; flex-wrap:wrap; gap:8px}
+.teacher .files a{
+  border:1px solid var(--line); border-radius:8px; padding:7px 12px;
+  font-size:13px; color:var(--title); text-decoration:none; background:var(--card)
+}
+.teacher .files a:hover{border-color:var(--o38)}
+.teacher code{background:var(--card); border:1px solid var(--line); padding:0 5px; border-radius:4px}
+
+/* ---------- 页脚 ---------- */
+footer{
+  border-top:1px solid var(--line); padding:26px 0 40px; text-align:center;
+  color:var(--muted); font-size:13px
+}
+footer .brand{color:var(--title); font-weight:700}
+footer .brand span{color:var(--orange)}
+
+@media (max-width:720px){
+  header{padding:30px 0 20px}
+  h1{font-size:23px}
+  .tab .name{display:none}          /* 手机上只留「第 N 节」 */
+  section{padding:24px 0}
+  .card{padding:20px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1 id="h1">🎮 我的世界教育版 · 体验课</h1>
+    <p class="sub" id="sub">四节课 · 从一条路走到一座房子 ｜ 图形化编程（MakeCode）</p>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <p class="progress-note" id="progress-note"></p>
+  </div>
+</header>
+
+<section class="howto">
+  <div class="wrap">
+    <h2>怎么用（三步）</h2>
+    <ol>
+      <li><b>先下载世界</b>：点卡片上的「⬇ 下载世界」。下好之后<b>打开 Minecraft Education</b>，
+          在「开始游戏」这一页点最下面的 <b>「导入」</b>，选你刚下载的那个文件。</li>
+      <li><b>进游戏做任务</b>：你会站在自己的场地里，跟着老师一关一关做。</li>
+      <li><b>做完任务回这个网页</b>：点「复制程序链接」，然后<b>回到游戏里</b>按 <code>C</code> 打开 Code Builder：
+          <br>① 如果里面已经开着别的程序，先点右上角的 <b>🏠 房子按钮</b>回到首页
+          <br>② 点 <b>「导入」</b> → 选 <b>「导入网址…」</b> → <b>粘贴</b> → 点 <b>「继续！」</b></li>
+    </ol>
+  </div>
+</section>
+
+<main class="wrap">
+  <section style="padding-top:0">
+    <h2 id="panel-title">这节课</h2>
+    <div id="panel" role="tabpanel"></div>
+  </section>
+
+  <section class="faq">
+    <h2>常见问题</h2>
+    <details>
+      <summary>世界下载了，怎么导进游戏？</summary>
+      <p>打开 <b>Minecraft Education</b> → 在「开始游戏」这一页点<b>最下面那个「导入」</b> → 选你刚下载的那个
+         <code>.mcworld</code> 文件。（文件一般在浏览器的「下载」文件夹里。）</p>
+    </details>
+    <details>
+      <summary>按 <code>C</code> 打不开 Code Builder？</summary>
+      <p>要先<b>进到世界里</b>（在主菜单按是没用的）。还打不开就举手找老师 —— 有时是第一次打开需要多等一会儿。</p>
+    </details>
+    <details>
+      <summary>「复制程序链接」点了没反应？</summary>
+      <p>手动选中下面那行灰色网址，按 <code>Ctrl+C</code>（Mac 是 <code>⌘C</code>）复制，一样能用。</p>
+    </details>
+    <details>
+      <summary>按 <code>C</code> 打开后，找不到「导入」按钮？</summary>
+      <p>说明里面已经开着一个程序了 —— 那些按钮只在<b>首页</b>才有。点右上角的 <b>🏠 房子按钮</b>回到首页，
+         就能看到 <b>「导入」</b>了。</p>
+    </details>
+    <details>
+      <summary>程序导进去了，机器人不动？</summary>
+      <p>三个地方挨个看一眼：① 你是不是站在<b>绿方块（施工位）</b>上；② 聊天栏里敲的指令名对不对
+         （<code>铺路</code> / <code>搭桥</code> / <code>建塔</code> / <code>建房</code>）；③ 程序里有没有先「给机器人方块」。</p>
+    </details>
+    <details>
+      <summary>后面几节课为什么点不动？</summary>
+      <p>还没上到那一节 —— 上完老师会把它打开。上过的课一直可以点，想重新下载世界随时都行。</p>
+    </details>
+  </section>
+
+  <section id="teacher-section" hidden>
+    <h2>老师用</h2>
+    <details class="teacher">
+      <summary>点开：参考解链接 · 调试版世界 · 上课注记（学生不用看）</summary>
+      <h4>参考解（老师自测 / 对照用，别发给学生）</h4>
+      <ul id="teacher-links"></ul>
+      <h4>调试版世界（带跳关按钮、命令可见）</h4>
+      <div class="files" id="teacher-files"></div>
+      <h4>上课注记</h4>
+      <ul>
+        <li>进世界后<b>等 3 秒</b>再动 —— 世界正在平整场地，这时候跑会掉下去。</li>
+        <li>学生说「机器人不动」，先看<b>聊天栏有没有报错</b>，再看是不是没站在绿方块上。</li>
+        <li>第 3 节建塔：提醒学生①那条填充的<b>模式要选「空心」</b>，选错会变成实心大方块。</li>
+        <li>第 4 节建房：最上面那三块「把 宽 设为 …」是<b>设置，别删</b>；删了就重新导入程序。</li>
+        <li>改造区/工地上的向导 NPC 有「重置」和「回到工地」按钮，学生改坏了点一下就能重来。</li>
+        <li>想控制"上到第几节"：改 <code>config.js</code> 里的 <code>进度</code>（1~4），后面的课会自动锁上。</li>
+      </ul>
+    </details>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="brand" id="brand"></p>
+    <p id="version"></p>
+  </div>
+</footer>
+
+<script src="config.js"></script>
+<script>
+/* ============================================================
+   四节课的内容。要改文案就改这里（改配置请改 config.js）
+   ============================================================ */
+const 课程数据 = [
+  {
+    节: 1, 名称: "让机器人铺路", 学到: "顺序执行（走 / 砸 / 转 / 放）", 成果: "一条路",
+    一句话: "给机器人配好方块，让它一路走过去，把路铺出来。",
+    世界: "worlds/lesson1.mcworld", 大小: "300 KB",
+    程序: "https://makecode.com/_4rdcdVgVtDyL", 指令: "铺路",
+    成就: [["★","跑通老师的程序，铺出一条 5 格金块路"],["★","让路拐一个弯"],
+           ["★★","铺一条 10 格的路"],["★★","让路拐 3 个弯"],
+           ["★★★","用 2 种方块铺一条彩色路"]],
+    可以改: ["<b>组数</b>：再复制一组「摧毁+放置+前进」→ 路变长",
+             "<b>顺序</b>：中间插一块「左转」→ 路就拐弯了",
+             "<b>方块</b>：金块换成木板 / 羊毛 / 钻石块",
+             "<b>高级开关</b>：加一条「移动时放置方块：开」，再删掉摧毁+放置 → 积木少一半，但路面高出一格"]
+  },
+  {
+    节: 2, 名称: "造一座桥", 学到: "填充与替换（改世界，不只是驱动机器人）", 成果: "一座桥",
+    一句话: "这次不驱动机器人 —— 直接用「填充」把桥一次铺出来。",
+    世界: "worlds/lesson2.mcworld", 大小: "304 KB",
+    程序: "https://makecode.com/_famgxfXefAmM", 指令: "搭桥",
+    成就: [["★","跑通老师的程序，搭出一座桥"],["★","把桥面换成石头"],
+           ["★★","把桥加宽"],["★★","给桥加一层桥墩"],
+           ["★★★","用 2 种材质搭一座漂亮的桥"],["★★★","自由发挥：搭一座你自己设计的桥"]],
+    可以改: ["<b>桥面方块</b>：木板 → 石砖 / 圆石 / 羊毛 / 金块",
+             "<b>扶手方块</b>：橡木栅栏 → 玻璃板 / 铁栏杆",
+             "<b>长度</b>：<code>16</code> → <code>20</code>（三条都要改）",
+             "<b>宽度</b>：<code>3</code> → <code>4</code>（桥面和右扶手<b>两处</b>）",
+             "<b>再加一条填充</b>：复制一条改数字 → 多出一层"]
+  },
+  {
+    节: 3, 名称: "盖一座塔", 学到: "循环与嵌套", 成果: "一座塔",
+    一句话: "让机器人学会「重复」，一层一层往上，最后砌一座金字塔。",
+    世界: "worlds/lesson3.mcworld", 大小: "301 KB",
+    程序: "https://makecode.com/_VyX0C2gTsX1V", 指令: "建塔",
+    成就: [["★","跑通老师的程序，建出一座塔"],["★","塔改成 8 层高"],
+           ["★","塔有多高，梯子有多高"],["★★","换一种方块"],
+           ["★★","塔改粗一点"],["★★★","彩虹塔（每层一个颜色）"],
+           ["★★★","一次建两座塔"]],
+    可以改: ["<b>层数</b>：① 的 <code>4</code> → <code>8</code> → 塔高一倍（每层会自己补方块，不用担心不够）",
+             "<b>粗细</b>：③ 的 <code>4</code> → <code>6</code> → 塔变成 7×7，胖一圈",
+             "<b>方块</b>：「给机器人」和「放置」的方块换成圆石 / 羊毛 / 石头",
+             "<b>梯子多长</b>：最后那个「重复 4 次」的 <code>4</code> → <code>8</code>",
+             "<b>每层换色</b>：把 ① 拆成 4 段，每段前面换一次「给机器人」→ 彩虹塔"]
+  },
+  {
+    节: 4, 名称: "搭自己的房子", 学到: "综合运用（+ 一点点命名数据）", 成果: "一座房子",
+    一句话: "三条积木盖一座房子 —— 改最上面那三个数字，房子就变大变小。",
+    世界: "worlds/lesson4.mcworld", 大小: "253 KB",
+    程序: "https://makecode.com/_R6tcA1MaXdTs", 指令: "建房",
+    成就: [["★","跑通老师的程序，建出一座房子"],["★","换成你喜欢的样子（材质）"],
+           ["★★","把房子变大"],["★★","加一扇门或一扇窗"],
+           ["★★★","加个烟囱，或者盖成二层"],["★★★","自由发挥：建一座你自己的房子"]],
+    可以改: ["<b>房子大小</b>：宽 / 长 的 <code>6</code> → <code>10</code>",
+             "<b>房子高矮</b>：高的 <code>4</code> → <code>6</code> → 墙和屋顶一起长高",
+             "<b>换材质</b>：① 那条的方块换成石砖 / 羊毛 / 钻石块 → 整座房子换材质，<b>只改一处</b>",
+             "<b>门多宽</b>：② 那条的 <code>+ 1</code> 改成 <code>+ 2</code>",
+             "<b>加烟囱 / 盖二层</b>：再写一条「填充」"]
+  }
+];
+
+/* 老师区的参考解（第 4 节没有任务环节，所以没有参考解） */
+const 参考解链接 = [
+  ["第 1 节 · 让机器人铺路（9 关）", "https://makecode.com/_14176xUvUbKp"],
+  ["第 2 节 · 造一座桥（8 关）",     "https://makecode.com/_87oAMxJW11FW"],
+  ["第 3 节 · 盖一座塔（7 关）",     "https://makecode.com/_dKLYFfcgcWFH"]
+];
+const 调试版世界 = [
+  ["第 1 节 · 调试版", "worlds/lesson1-debug.mcworld"],
+  ["第 2 节 · 调试版", "worlds/lesson2-debug.mcworld"],
+  ["第 3 节 · 调试版", "worlds/lesson3-debug.mcworld"],
+  ["第 4 节 · 调试版", "worlds/lesson4-debug.mcworld"]
+];
+
+/* ============================================================
+   以下不用改
+   ============================================================ */
+const 默认配置 = {进度:1, 显示老师区:false, 课程名:"我的世界教育版 · 体验课",
+                  机构名:"", 版本:""};
+const cfg = Object.assign({}, 默认配置, window.课程配置 || {});
+const 总节数 = 课程数据.length;
+const 进度 = Math.max(0, Math.min(总节数, parseInt(cfg.进度, 10) || 0));
+let 当前 = 0;
+
+/* ---- 头部 ---- */
+if (cfg.课程名) document.getElementById("h1").textContent = "🎮 " + cfg.课程名;
+document.title = cfg.课程名 || document.title;
+
+/* ---- 选项卡（点了就切换下面那张卡片）---- */
+const tabs = document.getElementById("tabs");
+课程数据.forEach(l => {
+  const b = document.createElement("button");
+  const 可点 = l.节 <= 进度;
+  b.className = "tab" + (l.节 < 进度 ? " done" : "");
+  b.type = "button";
+  b.setAttribute("role", "tab");
+  b.setAttribute("aria-selected", "false");
+  b.disabled = !可点;
+  b.dataset.lesson = l.节;
+  b.title = 可点 ? l.名称 : "还没上到这一节";
+  b.innerHTML = `<span class="ico">${l.节 < 进度 ? "✓" : 可点 ? "▶" : "🔒"}</span>
+                 <span class="num">第 ${l.节} 节</span>
+                 <span class="name">${l.名称}</span>`;
+  b.addEventListener("click", () => 选中(l.节, true));
+  tabs.appendChild(b);
+});
+
+/* ---- 下面那一块 ---- */
+const panel = document.getElementById("panel");
+const panelTitle = document.getElementById("panel-title");
+
+function 渲染卡片(l) {
+  panelTitle.textContent = "第 " + l.节 + " 节 · " + l.名称;
+  panel.innerHTML = `
+    <article class="card">
+      <div class="card-head">
+        <span class="badge">第 ${l.节} 节</span>
+        <h3>${l.名称}</h3>
+      </div>
+      <p class="meta">学到：${l.学到}　｜　成果：${l.成果}</p>
+      <p class="desc">${l.一句话}</p>
+
+      <div class="steps">
+
+        <div class="step">
+          <div class="step-head">
+            <span class="step-no">环节 2</span>
+            <span class="step-title">先下载世界</span>
+            <span class="step-when">进游戏做任务之前</span>
+          </div>
+          <a class="btn btn-primary" href="${l.世界}" download>⬇ 下载世界 · ${l.大小}</a>
+          <p class="hint">下好之后：<b>打开 Minecraft Education</b> → 在「开始游戏」这一页点最下面的
+             <b>「导入」</b> → 选你刚下载的那个文件 → 进游戏跟着老师一关一关做</p>
+        </div>
+
+        <div class="step">
+          <div class="step-head">
+            <span class="step-no">环节 3</span>
+            <span class="step-title">做完任务再回来：改造环节</span>
+            <span class="step-when">任务做完了，或老师说到时间了</span>
+          </div>
+          <div class="row">
+            <button class="btn btn-copy" data-link="${l.程序}">复制程序链接</button>
+            <a class="btn btn-ghost" href="${l.程序}" target="_blank" rel="noopener">打开看看</a>
+          </div>
+          <p class="hint url">${l.程序}</p>
+          <ol class="hint steps-mini">
+            <li>回到游戏里按 <b>C</b> 打开 Code Builder</li>
+            <li>如果里面已经开着别的程序：先点右上角的 <b>🏠 房子按钮</b>回到首页</li>
+            <li>点 <b>「导入」</b> → 选 <b>「导入网址…」</b> → <b>粘贴</b>刚才复制的链接 → 点 <b>「继续！」</b></li>
+            <li>回到游戏，聊天栏敲 <b>「${l.指令}」</b></li>
+          </ol>
+
+          <div class="sub-block">
+            <div class="block-label">成就 <span class="size">· 自选，做到就算成功</span></div>
+            <ul class="achv">${l.成就.map(a => `<li><b>${a[0]}</b>${a[1]}</li>`).join("")}</ul>
+          </div>
+          <div class="sub-block">
+            <div class="block-label">可以改什么 <span class="size">· 自由发挥</span></div>
+            <ul class="knobs">${l.可以改.map(k => `<li>${k}</li>`).join("")}</ul>
+          </div>
+        </div>
+
+      </div>
+    </article>`;
+}
+
+function 渲染锁着(l) {
+  panelTitle.textContent = "第 " + l.节 + " 节 · " + l.名称;
+  panel.innerHTML = `
+    <div class="locked-box">
+      <span class="big">🔒</span>
+      第 ${l.节} 节 <b>${l.名称}</b> 还没上到
+      <p class="small">上完老师会把它打开 —— 上过的课一直可以点，想重新下载世界随时都行</p>
+    </div>`;
+}
+
+function 渲染未开课() {
+  panelTitle.textContent = "还没开课";
+  panel.innerHTML = `
+    <div class="locked-box">
+      <span class="big">🕒</span>
+      课程还没开始，四节课<b>都还没开放</b>
+      <p class="small">老师开课后，这里就会出现第一节课</p>
+    </div>`;
+}
+
+/* ---- 切换：默认停在"当前那一节"；网址带 #l3 就直接开第 3 节 ---- */
+function 选中(节, 写网址) {
+  if (节 < 1 || 节 > 总节数 || 节 > 进度) return;   // 锁着的不让点
+  当前 = 节;
+  tabs.querySelectorAll(".tab").forEach(t => {
+    t.setAttribute("aria-selected", String(Number(t.dataset.lesson) === 节));
+  });
+  渲染卡片(课程数据[节 - 1]);
+  if (写网址) history.replaceState(null, "", "#l" + 节);
+}
+
+function 刷新提示() {
+  document.getElementById("progress-note").innerHTML = 进度 === 0
+    ? "课程还没开始，四节课<b>都还没开放</b>"
+    : 进度 >= 总节数
+      ? "四节课<b>全部开放</b> —— 点上面的按钮切换"
+      : "目前进行到 <b>第 " + 进度 + " 节</b> —— 后面几节上完就会开放";
+}
+
+刷新提示();
+const 想要 = /^#l([1-4])$/.exec(location.hash);
+if (进度 === 0) 渲染未开课();
+else if (想要 && Number(想要[1]) <= 进度) 选中(Number(想要[1]), false);
+else 选中(进度, false);          // 默认 = 当前正在上（或刚上完）的那一节
+
+window.addEventListener("hashchange", () => {
+  const m = /^#l([1-4])$/.exec(location.hash);
+  if (m && Number(m[1]) <= 进度) 选中(Number(m[1]), false);
+});
+
+/* ---- 复制按钮（复制失败自动降级成"手动选中"）---- */
+panel.addEventListener("click", async e => {
+  const btn = e.target.closest(".btn-copy[data-link]");
+  if (!btn) return;
+  const text = btn.dataset.link;
+  const 原样 = btn.textContent;
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch (_) {}
+  if (!ok) {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { ok = document.execCommand("copy"); } catch (_) {}
+    document.body.removeChild(ta);
+  }
+  btn.textContent = ok ? "✅ 已复制" : "请选中下面那行网址复制";
+  setTimeout(() => { btn.textContent = 原样; }, 2200);
+});
+
+/* ---- 老师区 ---- */
+if (cfg.显示老师区) {
+  document.getElementById("teacher-section").hidden = false;
+  const ul = document.getElementById("teacher-links");
+  参考解链接.forEach(([名, 链]) => {
+    ul.insertAdjacentHTML("beforeend",
+      `<li>${名} —— <a href="${链}" target="_blank" rel="noopener">${链}</a></li>`);
+  });
+  const box = document.getElementById("teacher-files");
+  调试版世界.forEach(([名, 链]) => {
+    box.insertAdjacentHTML("beforeend", `<a href="${链}" download>⬇ ${名}</a>`);
+  });
+}
+
+/* ---- 页脚 ---- */
+const brand = document.getElementById("brand");
+brand.innerHTML = cfg.机构名
+  ? cfg.机构名.replace(/^(\S+)\s+(\S+)$/, '<span>$1</span> $2')
+  : (cfg.课程名 || "");
+document.getElementById("version").textContent = cfg.版本 ? "版本：" + cfg.版本 : "";
+</script>
+</body>
+</html>
